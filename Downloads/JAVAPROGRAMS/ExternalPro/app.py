@@ -1,16 +1,20 @@
 from flask import Flask, render_template, request, jsonify
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+from google.generativeai import types
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyOAuth # type: ignore
 import logging
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 
 # Initialize the client with environment variable
-client = genai.Client(api_key=os.getenv('GOOGLE_API_KEY'))
+genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
 # Spotify credentials from environment variables
 SPOTIPY_CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
@@ -65,7 +69,7 @@ def chat():
             response_text = "I can't directly control Spotify to play a song for you. Please make sure Spotify is open and you are logged in."
     else:
         # Generate response using Gemini model
-        response = client.models.generate_content(
+        response = genai.models.generate_content(
             model="gemini-2.0-flash",
             contents=[user_input],
             config=types.GenerateContentConfig(
